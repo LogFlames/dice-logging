@@ -225,6 +225,15 @@ void handleRoot() {
         current_sides.concat("</p>");
     }
 
+    String current_reading = "X: ";
+    current_reading.concat(event.acceleration.x);
+    current_reading.concat(" Y: ");
+    current_reading.concat(event.acceleration.y);
+    current_reading.concat(" Z: ");
+    current_reading.concat(event.acceleration.z);
+    current_reading.concat(" Side: ");
+    current_reading.concat(read_side());
+
     String html =
         "<html>"
         "<head>"
@@ -234,6 +243,7 @@ void handleRoot() {
         "    <h1>Time Logging Dice Interface</h1>";
     html.concat(current_sides);
     html.concat("<h2>Current reading: </h2>");
+    html.concat(current_reading);
     html.concat("<h2>Configuration options: </h2>");
     html.concat(
     "    <form action=\"/save\" method=\"POST\">"
