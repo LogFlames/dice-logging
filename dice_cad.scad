@@ -1,5 +1,7 @@
 $fn = 40;
 
+upper = true;
+
 rad = 45;
 wall_thickness = 2;
 battery_thickness = 5.5;
@@ -15,7 +17,7 @@ accel_pin_hole_distance_from_edge = 9.5;
 accel_pin_top_diameter = 2;
 accel_pin_bottom_diameter = 2;
 main_inner_width = 16;
-main_outer_width = 25.4;
+main_outer_width = 25.3;
 main_height = 10;
 main_rise = 2;
 main_thickness = 5;
@@ -27,7 +29,7 @@ main_bar_distance = 0;//1.5;
 main_side = 0;
 magnet_radius = 5.2;
 magnet_height = 3;
-magnet_distance = 2.5;
+magnet_distance = 2;
 magnet_screw_radius = 1;
 magnet_screw_height = 10;
 magnet_cylinder_radius = 7.5;
@@ -38,6 +40,7 @@ angle = 31.717474411;
 angle2 = 37.3773681;
 angle3 = 116.5650512;
 accel_wall_dist = max(0, accel_depth - accel_height * tan( angle3 - 90));
+inner_to_inner = 1.3763819 / sqrt(3) * (rad - wall_thickness);
 
 phi = 1 / 2 + sqrt(5 / 4);
 
@@ -172,7 +175,7 @@ main_f4 = [[1,0,2,3],[0,1,5,4],[5,1,3,7],[2,0,4,6],[6,7,3,2],[4,5,7,6]];
 
 //translate([-rad - 2,0,0]) {
     union() {
-        /*
+        if (!upper) {
         translate([0,0,r_outer-r_inner]) {
             rotate([0,0,72*battery_side]) {
                 polyhedron(points = battery_p, faces = battery_f, convexity = 10);
@@ -203,41 +206,55 @@ main_f4 = [[1,0,2,3],[0,1,5,4],[5,1,3,7],[2,0,4,6],[6,7,3,2],[4,5,7,6]];
                 polyhedron(points = main_p4, faces = main_f4, convexity = 10);
 
             }
-        }*/
+        }
+    }
         // NOTE (Elias): Here are some hard-coded values
         translate([4.5  ,8,(r_outer - r_inner) * sqrt(3)]) {
-            inner_to_inner = 1.3763819 / sqrt(3) * (rad - wall_thickness);
             rotate([0,0,angle2]) {
                 difference() {
                     translate([0,0,-1.5]) {
-                        cylinder(h = inner_to_inner - 0.5 - magnet_distance / 2, r = 7.5, center = false);
+                        cylinder(h = inner_to_inner + 1.5 - magnet_distance / 2, r = 7.5, center = false);
                     }
                     
                     union() {
-                        translate([0,0,inner_to_inner - magnet_height - magnet_distance / 2 - 2 - magnet_screw_height]) {
+                        translate([0,0,inner_to_inner - magnet_height - magnet_distance / 2 - magnet_screw_height]) {
                                 cylinder(r = magnet_screw_radius, h = magnet_screw_height + 1, center = false);
                         }
-                        translate([0,0,inner_to_inner - magnet_height - magnet_distance / 2 - 2]) {
+                        translate([0,0,inner_to_inner - magnet_height - magnet_distance / 2]) {
                                 cylinder(r = magnet_radius + 0.25, h = magnet_screw_height + 100, center = false);
                         }
                     }
-                
-                    /*union() {
-                        translate([0,0,inner_to_inner - magnet_height / 2 - magnet_distance / 2 - 2]) {
-                            translate([magnet_cylinder_radius,0,0]) {
-                                cube([magnet_cylinder_radius * 2,magnet_radius * 2,magnet_height], center = true);
-                            }
-                            translate([0,0,0]) {
-                                cylinder(r = magnet_radius, h = magnet_height, center = true);
-                            }
-                        }
-                    }*/
                 }
             }
         }
         translate([0,0,2.7527638409422998/2 * r_outer]) {
             rotate([0,angle + 180,0]) {
                 polyhedron(points = concat(wall_p, wall_p2), faces = concat(wall_f, wall_f2, wall_f3), convexity = 10);
+            }
+        }
+        if (upper) {
+            
+            difference() {
+                translate([0,0,2.7527638409422998/2 * r_outer]) {
+                    rotate([0,angle + 180,0]) {
+                        scale(((rad - wall_thickness) / sqrt(3)) / r_outer) {
+                                union() {
+                                    polyhedron(points = concat(wall_p, wall_p2), faces = concat(wall_f, wall_f2, wall_f3), convexity = 10);
+                                    rotate([0,180,0]) {
+                                        polyhedron(points = concat(wall_p, wall_p2), faces = concat(wall_f, wall_f2, wall_f3), convexity = 10);
+                                    }
+                                }
+                        }
+                    }
+                }
+                union() {
+                    translate([0,0,-rad + inner_to_inner / 2 + wall_thickness]) {
+                        cube([rad * 3, rad * 3, rad * 2], center = true);
+                    }
+                    translate([0,0,rad + inner_to_inner * 2 + wall_thickness - inner_to_inner * 2.8 / 4]) {
+                        cube([rad * 3, rad * 3, rad * 2], center = true);
+                    }
+                }
             }
         }
     }
