@@ -18,7 +18,7 @@
 #define duration_deep_sleep 1
 #define last_sides_length 8
 #define project_GET_page_size 12
-#define DEBUGMODE true
+#define DEBUGMODE false
 
 ESP8266WiFiMulti wifiMulti;
 ESP8266WebServer server(80);
@@ -760,6 +760,7 @@ void handle_root() {
     String html =
         "<html>"
         "<head>"
+        "    <meta charset=\"UTF-8\">"
         "    <title>Time Logging Dice</title>"
         "</head>"
         "<body>"

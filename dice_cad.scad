@@ -221,9 +221,9 @@ main_f4 = [[1,0,2,3],[0,1,5,4],[5,1,3,7],[2,0,4,6],[6,7,3,2],[4,5,7,6]];
 magnet_poss = [[4.5, 8, (r_outer - r_inner) * sqrt(3)],
             [-8,-28,(r_outer - r_inner) * sqrt(3)]];
 
-for (i = [1:1]) {
+for (i = [0:1]) {
     upper = i;
-    //translate([(-rad -2) * sign(i - 0.5), 0, 0]) {
+    translate([(-rad -2) * sign(i - 0.5), 0, 0]) {
     translate([0,0,0]) {
         union() {
             if (!upper) {
@@ -283,8 +283,9 @@ for (i = [1:1]) {
             
             a = upper ? -36 : 0;
 
-                rotate([0,0,a]) {
-                difference() {
+            difference() {    
+            rotate([0,0,a]) {
+                
                     union() {
                         for (p = magnet_poss) {
                             // NOTE (Elias): Here are some hard-coded values
@@ -307,11 +308,10 @@ for (i = [1:1]) {
                                 }
                             }
                         }
-                    }
+                    }}
                        translate([0,0,2.7527638409422998/2 * r_outer]) {
             rotate([0,angle + 180,0]) {
             polyhedron(points = concat(wall_large_p, wall_large_p2), faces = concat(wall_f, wall_f2, wall_f3));
-            }
         }
                     /*rotate([angle, angle,0]) {
                         translate([0,-1.3763819 / sqrt(3) * (sin(angle) * rad) - rad,2.7527638409422998/2 * r_outer]) {    
@@ -344,8 +344,8 @@ for (i = [1:1]) {
                         }
                     }
                     union() {
-                        translate([0,0,-rad + inner_to_inner / 2 + wall_thickness]) {
-                            //cube([rad * 3, rad * 3, rad * 2], center = true);
+                        translate([0,0,-rad+ inner_to_inner / 2 + wall_thickness]) {
+                            cube([rad * 3, rad * 3, rad * 2], center = true);
                         }
                         translate([0,0,rad + inner_to_inner * 2 + wall_thickness - inner_to_inner * 2.8 / 4]) {
                             cube([rad * 3, rad * 3, rad * 2], center = true);
@@ -364,6 +364,7 @@ for (i = [1:1]) {
                                 }
                             }
                         }
+                    }
                     }
                 }
             }
