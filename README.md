@@ -76,10 +76,12 @@ wifiMulti.addAP("SSID", "password");
 I will maybe add a proper schematic here later, for now I will just write it down to document it.
 
 ### Between the accelerometer and ESP8266
+```
 Accel: GND -> ESP8266: GND  
 Accel: VCC -> ESP8266: 5V  
 Accel: SCL -> ESP8266: D1  
 Accel: SDA -> ESP8266: D2  
+```
 
 ### Between the ESP8266 and the turn-off button
 ESP8266: 3.3V -> Button (side 1) -> Button (side 2) -> ESP8266: D5 and -> 100KOhm -> ESP8266: GND
