@@ -4,7 +4,11 @@ This is the repo containing my project during the 2021 math camp.
 
 The project is built using an ESP8266 and accelerometer.
 
-To upload the code use the ESP8266 package for the arduino IDE.
+To upload the code use the ESP8266 package for the arduino IDE. 
+
+Add this to `File > Preferences > Additional Board Manager URLs` (http://arduino.esp8266.com/stable/package_esp8266com_index.json]. Goto `Tools > Board > Board Manager` and install the ESP8266 module. Select `Generic ESP8266 Module` in `Tools > Board`.
+
+Goto `Sketch > Include Library > Manage Libraries` and install the NTPClient. Install the Adafruit ADXL_345 library aswell.
 
 The ClockifyAPI documentation can be found at: (https://clockify.me/developers-api)[!https://clockify.me/developers-api]
 

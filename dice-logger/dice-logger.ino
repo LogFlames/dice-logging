@@ -20,6 +20,9 @@
 #define project_GET_page_size 12
 #define DEBUGMODE false
 
+// This should be built into the CORE I would assume, but it does not seem to be... Or something is not imported correctly
+#define D5 14
+
 ESP8266WiFiMulti wifiMulti;
 ESP8266WebServer server(80);
 
@@ -37,9 +40,13 @@ std::vector<float> sides_Ys = {};
 std::vector<float> sides_Zs = {};
 std::vector<String> sides_project_names = {};
 std::vector<String> sides_project_ids = {};
+std::vector<String> sides_workspace_names = {};
+std::vector<String> sides_workspace_ids = {};
 
 std::vector<String> project_names = {};
 std::vector<String> project_ids = {};
+std::vector<String> project_workspace_names = {};
+std::vector<String> project_workspace_ids = {};
 String user_id = "";
 
 const char* configuration_filename = "/configuration.txt";
@@ -185,110 +192,115 @@ void GET_projects() {
     client.setFingerprint(fingerprint);
     client.setTimeout(15000);
 
-    bool found_data = true;
-    int page = 1;
     project_names = {};
     project_ids = {};
+    project_workspace_ids = {};
     String line;
 
+    for (int i = 0; i < workspace_ids.size(); i++) {
+        bool found_data = true;
+        int page = 1;
 
-    while (found_data) {
-        found_data = false;
-        if (!client.connect(clockify_host, httpsPort)) {
-            if (DEBUGMODE) {
-                Serial.print("Connection failure: "); Serial.print(clockify_host); Serial.print(":"); Serial.println(httpsPort);
-            }
-            return;
-        }
-
-        String url = "/api/v1/workspaces/" + workspace_id + "/projects?archived=false&page-size=" + String(project_GET_page_size) + "&page=" + String(page);
-        if (DEBUGMODE) {
-            Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
-        }
-        client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + clockify_host  + "\r\n" + "X-Api-Key: " + api_code + "\r\n" + "Connection: close\r\n\r\n");
-        unsigned long timeout = millis();
-
-        while (client.available() == 0) {
-            if (millis() - timeout > 5000) {
-                Serial.println("Client timeout!");
-                client.stop();
+        while (found_data) {
+            found_data = false;
+            if (!client.connect(clockify_host, httpsPort)) {
+                if (DEBUGMODE) {
+                    Serial.print("Connection failure: "); Serial.print(clockify_host); Serial.print(":"); Serial.println(httpsPort);
+                }
                 return;
             }
-            delay(100);
-        }
 
+            String url = "/api/v1/workspaces/" + workspace_ids[i] + "/projects?archived=false&page-size=" + String(project_GET_page_size) + "&page=" + String(page);
+            if (DEBUGMODE) {
+                Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
+            }
+            client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + clockify_host  + "\r\n" + "X-Api-Key: " + api_code + "\r\n" + "Connection: close\r\n\r\n");
+            unsigned long timeout = millis();
 
-        int projects_this_page = 0;
-        while(client.available() && projects_this_page < project_GET_page_size) {
-            line = client.readStringUntil(']'); 
-
-            if (line.length() == 0) {
-                if (DEBUGMODE) {
-                    Serial.println("Parsed all data from clockify");
+            while (client.available() == 0) {
+                if (millis() - timeout > 5000) {
+                    Serial.println("Client timeout!");
+                    client.stop();
+                    return;
                 }
-                break;
+                delay(100);
             }
 
-            unsigned int i = 5;
 
-            while (i < line.length()) {
+            int projects_this_page = 0;
+            while(client.available() && projects_this_page < project_GET_page_size) {
+                line = client.readStringUntil(']');
 
-                if (line[i - 5] == '\"' && 
-                    line[i - 4] == 'i' && 
-                    line[i - 3] == 'd' && 
-                    line[i - 2] == '\"' && 
-                    line[i - 1] == ':' && 
-                    line[i    ] == '\"') {
-                        String id = "";
-                        String name = "";
-                        i++;
-                        while (line[i] != '\"' && i < line.length()) {
-                            id += line[i];
+                if (line.length() == 0) {
+                    if (DEBUGMODE) {
+                        Serial.println("Parsed all data from clockify");
+                    }
+                    break;
+                }
+
+                unsigned int i = 5;
+
+                while (i < line.length()) {
+
+                    if (line[i - 5] == '\"' &&
+                        line[i - 4] == 'i' &&
+                        line[i - 3] == 'd' &&
+                        line[i - 2] == '\"' &&
+                        line[i - 1] == ':' &&
+                        line[i    ] == '\"') {
+                            String id = "";
+                            String name = "";
                             i++;
-                        }
-
-                        if (i + 9 >= line.length()) {
-                            break;
-                        }
-
-                        i += 9;
-
-                        if (line[i - 8] == ',' && 
-                            line[i - 7] == '\"' && 
-                            line[i - 6] == 'n' && 
-                            line[i - 5] == 'a' && 
-                            line[i - 4] == 'm' && 
-                            line[i - 3] == 'e' && 
-                            line[i - 2] == '\"' && 
-                            line[i - 1] == ':' && 
-                            line[i    ] == '\"') {
+                            while (line[i] != '\"' && i < line.length()) {
+                                id += line[i];
                                 i++;
-                                while(line[i] != '\"' && i < line.length()) {
-                                    name += line[i];
+                            }
+
+                            if (i + 9 >= line.length()) {
+                                break;
+                            }
+
+                            i += 9;
+
+                            if (line[i - 8] == ',' &&
+                                line[i - 7] == '\"' &&
+                                line[i - 6] == 'n' &&
+                                line[i - 5] == 'a' &&
+                                line[i - 4] == 'm' &&
+                                line[i - 3] == 'e' &&
+                                line[i - 2] == '\"' &&
+                                line[i - 1] == ':' &&
+                                line[i    ] == '\"') {
                                     i++;
-                                }
-                        }
+                                    while(line[i] != '\"' && i < line.length()) {
+                                        name += line[i];
+                                        i++;
+                                    }
+                            }
 
-                        if (i == line.length()) {
-                            break;
-                        }
+                            if (i == line.length()) {
+                                break;
+                            }
 
-                        if (DEBUGMODE) {
-                            Serial.print("Id: "); Serial.print(id); Serial.print(" Name: "); Serial.println(name);
-                        }
-                        project_names.push_back(name);
-                        project_ids.push_back(id);
-                        projects_this_page++;
-                        if (projects_this_page >= project_GET_page_size) {
-                            found_data = true;
-                        }
+                            if (DEBUGMODE) {
+                                Serial.print("Id: "); Serial.print(id); Serial.print(" Name: "); Serial.println(name);
+                            }
+                            project_names.push_back(name);
+                            project_ids.push_back(id);
+                            project_workspace_ids.push_back(workspace_ids[i]);
+                            project_workspace_names.push_back(workspace_names[i]);
+                            projects_this_page++;
+                            if (projects_this_page >= project_GET_page_size) {
+                                found_data = true;
+                            }
+                    }
+
+                    i++;
                 }
-
-                i++;
             }
-        }
 
-        page++;
+            page++;
+        }
     }
 
     if (DEBUGMODE) {
@@ -309,23 +321,25 @@ void PATCH_project_stop() {
         return;
     }
 
-    String url = "/api/v1/workspaces/" + workspace_id + "/user/" + user_id + "/time-entries";
-    if (DEBUGMODE) {
-        Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
-    }
-    String postData = "{\"end\":\"" + get_current_time() + "\"}";
-    HTTPClient http;
-    http.begin(client, String("https://") + clockify_host + url);
-    http.addHeader("Content-type", "application/json");
-    http.addHeader("X-Api-Key", api_code);
-    int httpCode = http.PATCH(postData);
-    if (DEBUGMODE) {
-        String payload = http.getString();
-        Serial.println(httpCode);
-        Serial.println(payload);
-    }
+    for (unsigned int i = 0; i < workspace_ids.size(); i++) {
+        String url = "/api/v1/workspaces/" + workspace_ids[i] + "/user/" + user_id + "/time-entries";
+        if (DEBUGMODE) {
+            Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
+        }
+        String postData = "{\"end\":\"" + get_current_time() + "\"}";
+        HTTPClient http;
+        http.begin(client, String("https://") + clockify_host + url);
+        http.addHeader("Content-type", "application/json");
+        http.addHeader("X-Api-Key", api_code);
+        int httpCode = http.PATCH(postData);
+        if (DEBUGMODE) {
+            String payload = http.getString();
+            Serial.println(httpCode);
+            Serial.println(payload);
+        }
 
-    http.end();
+        http.end();
+    }
 }
 
 void POST_project_start() {
@@ -345,7 +359,7 @@ void POST_project_start() {
         return;
     }
 
-    String url = "/api/v1/workspaces/" + workspace_id + "/time-entries";
+    String url = "/api/v1/workspaces/" + sides_workspace_ids[current_side] + "/time-entries";
     if (DEBUGMODE) {
         Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
     }
@@ -408,6 +422,7 @@ void format_memory() {
     }
 }
 
+// save and load project workspace ids
 void load_configuration() {
     if (LittleFS.exists(configuration_filename)) {
         File f = LittleFS.open(configuration_filename, "r");
@@ -487,12 +502,43 @@ void load_configuration() {
                     current.concat(c);
                 }
             }
+            while (f.available() && (c = (char)f.read())) {
+                if (DEBUGMODE) {
+                    Serial.print(c);
+                }
+                if (c == ';') {
+                    sides_workspace_names.push_back(current);
+                    current = "";
+                } else if (c == '\n') {
+                    break;
+                } else {
+                    current.concat(c);
+                }
+            }
+            while (f.available() && (c = (char)f.read())) {
+                if (DEBUGMODE) {
+                    Serial.print(c);
+                }
+                if (c == ';') {
+                    sides_workspace_ids.push_back(current);
+                    current = "";
+                } else if (c == '\n') {
+                    break;
+                } else {
+                    current.concat(c);
+                }
+            }
             f.close();
             if (DEBUGMODE) {
                 Serial.println("File Closed");
             }
 
-            if (sides_Xs.size() != sides_Ys.size() || sides_Ys.size() != sides_Zs.size() || sides_Zs.size() != sides_project_ids.size() || sides_project_ids.size() != sides_project_names.size()) {
+            if (sides_Xs.size() != sides_Ys.size() ||
+                sides_Ys.size() != sides_Zs.size() ||
+                sides_Zs.size() != sides_project_ids.size() ||
+                sides_project_ids.size() != sides_project_names.size() ||
+                sides_project_names.size() != sides_workspace_names.size() ||
+                sides_workspace_names.size() != sides_workspace_ids.size()) {
                 if (DEBUGMODE) {
                     Serial.println("The loaded values did not have the same size. Formatting memory...");
                 }
@@ -535,6 +581,16 @@ void write_configuration() {
         f.print("\n");
         for (unsigned int i = 0; i < sides_project_ids.size(); i++) {
             f.print(sides_project_ids[i]);
+            f.print(";");
+        }
+        f.print("\n");
+        for (unsigned int i = 0; i < sides_workspace_names.size(); i++) {
+            f.print(sides_workspace_names[i]);
+            f.print(";");
+        }
+        f.print("\n");
+        for (unsigned int i = 0; i < sides_workspace_ids.size(); i++) {
+            f.print(sides_workspace_ids[i]);
             f.print(";");
         }
         f.print("\n");
@@ -729,8 +785,13 @@ void handle_root() {
     String current_sides = "";
     for (unsigned int i = 0; i < sides_Xs.size(); i++) {
         current_sides.concat("<p>");
+        current_sides.concat("[");
         current_sides.concat(i);
-        current_sides.concat(": ");
+        current_sides.concat("] ");
+        current_sides.concat(sides_workspace_names[i]);
+        current_sides.concat(" (");
+        current_sides.concat(sides_workspace_ids[i]);
+        current_sides.concat("): ");
         current_sides.concat(sides_project_names[i]);
         current_sides.concat(" (");
         current_sides.concat(sides_project_ids[i]);
@@ -754,7 +815,7 @@ void handle_root() {
 
     String project_dropdown = "";
     for (unsigned int i = 0; i < project_names.size(); i++) {
-        project_dropdown += "<option value=\"" + project_ids[i] + "\">" + project_names[i] + "</option>";
+        project_dropdown += "<option value=\"" + project_workspace_ids[i] + ":" + project_ids[i] + "\">" + project_workspace_names[i] + ": " + project_names[i] + "</option>";
     }
 
     String html =
@@ -773,7 +834,7 @@ void handle_root() {
     "    <form action=\"/save\" method=\"POST\">"
     "        <label for=\"project\">Choose what project to log time on</label>"
     "        <select name=\"project\" id=\"project\">"
-    "            <option value=\"noproj\">No Project/Stop Logging</option>");
+    "            <option value=\"noproj:noproj\">No Project/Stop Logging</option>");
     html.concat(project_dropdown);
     html.concat(
     "        </select><br>"
@@ -804,10 +865,24 @@ void handle_save() {
     sides_Xs.push_back(event.acceleration.x);
     sides_Ys.push_back(event.acceleration.y);
     sides_Zs.push_back(event.acceleration.z);
-    sides_project_ids.push_back(server.arg("project"));
+    String project_id, ws_id;
+    bool is_ws = true;
+    for (unsigned int i = 0; i < server.arg("project").length(); i++) {
+        if (server.arg("project")[i] == ':') {
+            is_ws = false;
+            continue;
+        }
 
+        if (is_ws) {
+            ws_id.concat(server.arg("project")[i]);
+        } else {
+            project_id.concat(server.arg("project")[i]);
+        }
+    }
+    sides_project_ids.push_back(project_id);
+    sides_workspace_ids.push_back(ws_id);
 
-    if (server.arg("project") == "noproj") {
+    if (project_id == "noproj") {
         sides_project_names.push_back("No Project/Stop Logging");
     } else {
         for (unsigned int i = 0; i < project_ids.size(); i++) {
@@ -815,8 +890,23 @@ void handle_save() {
                 Serial.println(project_ids[i]);
                 Serial.println(server.arg("project"));
             }
-            if (project_ids[i] == server.arg("project")) {
+            if (project_ids[i] == project_id) {
                 sides_project_names.push_back(project_names[i]);
+                break;
+            }
+        }
+    }
+
+    if (ws_id == "noproj") {
+        sides_workspace_names.push_back("");
+    } else {
+        for (unsigned int i = 0; i < project_ids.size(); i++) {
+            if (DEBUGMODE) {
+                Serial.println(workspace_ids[i]);
+                Serial.println(ws_id);
+            }
+            if (workspace_ids[i] == ws_id) {
+                sides_workspace_names.push_back(workspace_names[i]);
                 break;
             }
         }
@@ -834,6 +924,8 @@ void handle_format() {
     sides_Zs = {};
     sides_project_ids = {};
     sides_project_names = {};
+    sides_workspace_names = {};
+    sides_workspace_ids = {};
 
     redirect_back_to_root();
 }
@@ -856,6 +948,8 @@ void handle_remove() {
     sides_Zs.erase(sides_Zs.begin() + ind);
     sides_project_ids.erase(sides_project_ids.begin() + ind);
     sides_project_names.erase(sides_project_names.begin() + ind);
+    sides_workspace_ids.erase(sides_workspace_ids.begin() + ind);
+    sides_workspace_names.erase(sides_workspace_names.begin() + ind);
 
     write_configuration();
 
