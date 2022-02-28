@@ -22,14 +22,11 @@ for (i = [0:1]) {
     translate([(-rad -2) * sign(i - 0.5), 0, 0]) {
     translate([0,0,0]) {
         union() {
-```
-
-```cpp
-                      }
-                  }
-                  }
-              }
-          }
+-----------------------------------------
+        }
+    }
+    }
+}
 ```
 
 To this:
@@ -39,15 +36,10 @@ for (i = [0:0]) { // Or 'for (i = [1:1]) {' to get the other half.
     //translate([(-rad -2) * sign(i - 0.5), 0, 0]) {
     translate([0,0,0]) {
         union() {
-```
-
-
-```cpp
-                      }
-                  }
-    //              }
-              }
-          }
+        }
+    //}
+    }
+}
 ```
 
 ## Code
@@ -84,7 +76,13 @@ Accel: SDA -> ESP8266: D2
 ```
 
 ### Between the ESP8266 and the turn-off button
-ESP8266: 3.3V -> Button (side 1) -> Button (side 2) -> ESP8266: D5 and -> 100KOhm -> ESP8266: GND
+ESP8266: 3.3V -> 
+  Button (side 1) -> 
+    Button (side 2) -> 
+      ESP8266: D5 
+    and -> 
+      100KOhm -> 
+        ESP8266: GND
 
 
 By: Elias Lundell
