@@ -76,13 +76,13 @@ Accel: SDA -> ESP8266: D2
 ```
 
 ### Between the ESP8266 and the turn-off button
-ESP8266: 3.3V -> 
-  Button (side 1) -> 
-    Button (side 2) -> 
-      ESP8266: D5 
-    and -> 
-      100KOhm -> 
-        ESP8266: GND
+ESP8266: 3.3V ->  
+  Button (side 1) ->  
+    Button (side 2) ->  
+      ESP8266: D5  
+    and ->  
+      100KOhm ->  
+        ESP8266: GND  
 
 
 By: Elias Lundell
