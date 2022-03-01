@@ -18,7 +18,7 @@
 #define duration_deep_sleep 1
 #define last_sides_length 8
 #define project_GET_page_size 12
-#define DEBUGMODE true
+#define DEBUGMODE false
 
 // This should be built into the CORE I would assume, but it does not seem to be... Or something is not imported correctly
 #define D5 14
@@ -384,7 +384,11 @@ void POST_project_start() {
 
 void POST_project() {
     if (current_side == -1 || sides_project_ids[current_side].length() <= 10) { // NOTE: We should be able to compare it to "noproj". But for some reason the length is 7, probably some \r or other character at the end or begining :(
-        PATCH_project_stop();
+        if (sides_project_ids[current_side][0] == 't') { // turn_off
+            turn_off();
+        } else {
+            PATCH_project_stop();
+        }
     } else {
         POST_project_start();
     }
@@ -682,7 +686,6 @@ void setup(void) {
 
     wifiMulti.addAP("Elias 11", "b3yz7naa5mkztar");
     // wifiMulti.addAP("Olof", "mattekollo");
-    // WiFi.begin(ssid, password);
 
     connect_to_wifi();
 
@@ -840,7 +843,8 @@ void handle_root() {
     "    <form action=\"/save\" method=\"POST\">"
     "        <label for=\"project\">Choose what project to log time on</label>"
     "        <select name=\"project\" id=\"project\">"
-    "            <option value=\"noproj:noproj\">No Project/Stop Logging</option>");
+    "            <option value=\"noproj:noproj\">No Project/Stop Logging</option>"
+    "            <option value=\"turnoff:turnoff\">Stop Logging and Turn Off</option>");
     html.concat(project_dropdown);
     html.concat(
     "        </select><br>"
@@ -890,6 +894,8 @@ void handle_save() {
 
     if (project_id == "noproj") {
         sides_project_names.push_back("No Project/Stop Logging");
+    } else if (project_id == "turnoff") {
+        sides_project_names.push_back("Stop Logging and Turn Off");
     } else {
         for (unsigned int i = 0; i < project_ids.size(); i++) {
             if (DEBUGMODE) {
@@ -904,6 +910,8 @@ void handle_save() {
     }
 
     if (ws_id == "noproj") {
+        sides_workspace_names.push_back("");
+    } else if (ws_id == "turnoff") {
         sides_workspace_names.push_back("");
     } else {
         for (unsigned int i = 0; i < project_ids.size(); i++) {
