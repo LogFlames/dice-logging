@@ -82,10 +82,9 @@ Accel: SDA -> ESP8266: D2
 ESP8266: 3.3V ->  
   Button (side 1) ->  
     Button (side 2) ->  
-      ESP8266: D5  
-      &  
-      100KOhm ->  
-        ESP8266: GND  
+      ESP8266: D5 ->  
+        100KOhm ->  
+          ESP8266: GND  
 ```
 
 By: Elias Lundell
