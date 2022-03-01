@@ -2,7 +2,7 @@
 
 This is the repo containing my project during the 2021 math camp.
 
-The project is built using an ESP8266 and accelerometer.
+The project is built using an ESP8266 and accelerometer (ADXL345).
 
 To upload the code use the ESP8266 package for the arduino IDE. 
 
@@ -47,9 +47,18 @@ for (i = [0:0]) { // Or 'for (i = [1:1]) {' to get the other half.
 In the file './dice-logger/api_code.h' you must fill in your details.
 
 ```cpp
-String api_code = "Your api code here";
-std::vector<String> workspace_names = {"<WORKSPACE NAME 1>", "<WORKSPACE NAME 2>"};
-std::vector<String> workspace_ids = {"<WORKSPACE ID 1>", "<WORKSPACE ID 2>"};
+String api_code = "<API CODE>";
+
+std::vector<String> workspace_names;
+std::vector<String> workspace_ids;
+
+void setup_workspaces() {
+    workspace_names.push_back("<WORKSPACE NAME 1>");
+    workspace_ids.push_back("<WORKSPACE ID 1>");
+
+    workspace_names.push_back("<WORKSPACE NAME 2>");
+    workspace_ids.push_back("<WORKSPACE ID 2>");
+}
 ```
 
 If something isn't working you probably want to enable DEBUGMODE where it sends a lot of prints over Serial. Set the variable to true and upload the new code.
@@ -68,8 +77,14 @@ wifiMulti.addAP("SSID", "password");
 
 You will also every so often need to update the fingerprint of api.clockify.me, just access it with a browser and copy the SHA1 hash to the code, and recompile.
 
+## Blikning behaviour
+Builtin LED:  
+* (On): Probably means it is sending data to/receiving data from clockify.  
+* (4hz): If the builtin LED blinks with 4hz it means it is checking what side is up.  
+* (many hz <- You know when you see it): It is about to turn off (useful to know when the turn-off button has been registered)  
+
 ## Connections
-I will maybe add a proper schematic here later, for now I will just write it down to document it.
+I will maybe add a proper schematic here later, for now I will just write it down to document it. <- This has now become permanent, although a little bit nicer formated that before.
 
 ### Between the accelerometer and ESP8266
 ```
