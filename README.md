@@ -48,7 +48,8 @@ In the file './dice-logger/api_code.h' you must fill in your details.
 
 ```cpp
 String api_code = "Your api code here";
-String workspace_id = "Your workspace id here";
+std::vector<String> workspace_names = {"<WORKSPACE NAME 1>", "<WORKSPACE NAME 2>"};
+std::vector<String> workspace_ids = {"<WORKSPACE ID 1>", "<WORKSPACE ID 2>"};
 ```
 
 If something isn't working you probably want to enable DEBUGMODE where it sends a lot of prints over Serial. Set the variable to true and upload the new code.
