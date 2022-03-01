@@ -1,0 +1,205 @@
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <style>
+      select {
+          margin: 8px 4px;
+          padding: 12px 20px;
+          border: 0px;
+          border-radius: 8px;
+          background-color: white;
+      }
+      input {
+          padding: 12px 20px;
+          margin: 8px 4px;
+          box-sizing: border-box;
+          border: 1px solid #F8F8F8;
+          border-radius: 8px;
+          background-color: white;
+      }
+      input[type="submit"]:hover {
+          transform: scale(1.12);
+      }
+      form {
+          background-color: #F2F2F2;
+          padding: 20px 20px;
+          border-radius: 0px;
+      }
+      body {
+          background-color: #white;
+      }
+      table {
+          border-collapse: collapse;
+      }
+      th, td {
+          border: 1px solid #DDDDDD;
+          padding: 8px;
+      }
+      tr:nth-child(even){background-color: #F2F2F2;}
+      tr:hover {background-color: #ddd;}
+      th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: #AEE3F6;
+          color: white;
+      }
+    </style>
+    <title>Time Logging Dice</title>
+  </head>
+  <body>
+    <center>
+      <h1>Time Logging Dice Interface</h1>
+    </center>
+    <h2>Configured sides</h2>
+    <table>
+      <tr>
+        <th>Index</th>
+        <th>Workspace Name</th>
+        <th>Workspace ID</th>
+        <th>Project Name</th>
+        <th>Project ID</th>
+        <th>X</th>
+        <th>Y</th>
+        <th>Z</th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Administration </td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Sälj</td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Ericsson</td>
+        <td>123989182392</td>
+        <td>-42.2</td>
+        <td>3229.1</td>
+        <td>-13.43</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Sweco</td>
+        <td>123989182392</td>
+        <td>-123.2</td>
+        <td>32.13</td>
+        <td>0.231</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Swish</td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Demo room</td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Allmän produktutveckling</td>
+        <td>123989182392</td>
+        <td>-42.2</td>
+        <td>3229.1</td>
+        <td>-13.43</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>Internmöte</td>
+        <td>123989182392</td>
+        <td>-123.2</td>
+        <td>32.13</td>
+        <td>0.231</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>No Project</td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>AtC</td>
+        <td>12351233512434523</td>
+        <td>LiU Student rekrytering</td>
+        <td>123989182392</td>
+        <td>32.13</td>
+        <td>3229.1</td>
+        <td>-22.43</td>
+      </tr>
+    </table>
+
+    <h2>Current reading</h2>
+    <table>
+      <tr>
+        <th>X</th>
+        <th>Y</th>
+        <th>Z</th>
+        <th>Side</th>
+      </tr>
+      <tr>
+        <td>12.321</td>
+        <td>-2.42</td>
+        <td>42.13</td>
+        <td>2</td>
+      </tr>
+    </table>
+    <h2>Configuration options</h2>
+
+    <form action="/save" method="POST">
+      <label for="project">Choose what project to log time on<br></label>
+      <select name="project" id="project">
+        <option value="noproj:noproj">No Project/Stop Logging</option>
+        <option value="turnoff:turnoff">Stop Logging and Turn Off</option>
+        <option value="temp">AtC: Marknadsföring</option>
+        <option value="temp">AtC: Swish</option>
+        <option value="temp">AtC: Sälj</option>
+        <option value="temp">AtC: Sweco</option>
+      </select><br>
+      <input type="submit" value="Save" style="background-color: #91F28F"><br>
+    </form>
+    <form action="/format" method="POST">
+      <input type="submit" value="Clear saved sides" style="background-color: #FC8A8A"><br>
+    </form>
+    <form action="/remove" method="POST">
+      <input type="number" name="index" placeholder="Index" required><br>
+      <input type="submit" value="Remove" style="background-color: #FC8A8A"><br>
+    </form>
+  </body>
+</html>

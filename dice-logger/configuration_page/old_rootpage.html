@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Time Logging Dice</title>
+  </head>
+  <body>
+    <h1>Time Logging Dice Interface</h1>
+    <p>[0] AtC (12351233512434523): Administration (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[1] AtC (12351233512434523): Sälj (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[2] AtC (12351233512434523): Ericsson (123989182392) X: -42.2 Y: 3229.1 Z: -13.43</p>
+    <p>[3] AtC (12351233512434523): Sweco (123989182392) X: -123.2 Y: 32.13 Z: 0.231</p>
+    <p>[4] AtC (12351233512434523): Swish (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[5] AtC (12351233512434523): Demo room (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[6] AtC (12351233512434523): Allmän produktutveckling (123989182392) X: -42.2 Y: 3229.1 Z: -13.43</p>
+    <p>[7] AtC (12351233512434523): Internmöte (123989182392) X: -123.2 Y: 32.13 Z: 0.231</p>
+    <p>[8] AtC (12351233512434523): No Project (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[9] AtC (12351233512434523): LiU Student rekrytering (123989182392) X: 32.13 Y: 3229.1 Z: -22.43</p>
+    <p>[10] AtC (12351233512434523): Marknadsföring (123989182392) X: -42.2 Y: 3229.1 Z: -13.43</p>
+    <p>[11] AtC (12351233512434523): Optimera (123989182392) X: -123.2 Y: 32.13 Z: 0.231</p>
+    <h2>Current reading: </h2>
+    X: 12.231 Y: -2.42 Z: 42.13 Side: 2
+    <h2>Configuration options: </h2>
+
+    <form action="/save" method="POST">
+      <label for="project">Choose what project to log time on</label>
+      <select name="project" id="project">
+        <option value="noproj:noproj">No Project/Stop Logging</option>
+        <option value="turnoff:turnoff">Stop Logging and Turn Off</option>
+        <option value="temp">AtC: Marknadsföring</option>
+        <option value="temp">AtC: Swish</option>
+        <option value="temp">AtC: Sälj</option>
+        <option value="temp">AtC: Sweco</option>
+      </select><br>
+      <input type="submit" value="Save"><br>
+    </form>
+    <form action="/format" method="POST">
+      <input type="submit" value="Clear saved sides"><br>
+    </form>
+    <form action="/remove" method="POST">
+      <input type="number" name="index" placeholder="Index"><br>
+      <input type="submit" value="Remove"><br>
+    </form>
+  </body>
+</html>

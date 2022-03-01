@@ -793,24 +793,23 @@ void loop(void)
 void handle_root() {
     String current_sides = "";
     for (unsigned int i = 0; i < sides_Xs.size(); i++) {
-        current_sides.concat("<p>");
-        current_sides.concat("[");
+        current_sides.concat("<tr><td>");
         current_sides.concat(i);
-        current_sides.concat("] ");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_workspace_names[i]);
-        current_sides.concat(" (");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_workspace_ids[i]);
-        current_sides.concat("): ");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_project_names[i]);
-        current_sides.concat(" (");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_project_ids[i]);
-        current_sides.concat(") X: ");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_Xs[i]);
-        current_sides.concat(" Y: ");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_Ys[i]);
-        current_sides.concat(" Z: ");
+        current_sides.concat("</td><td>");
         current_sides.concat(sides_Zs[i]);
-        current_sides.concat("</p>");
+        current_sides.concat("</td></tr>");
     }
 
     String current_reading = "X: ";
@@ -828,37 +827,105 @@ void handle_root() {
     }
 
     String html =
-        "<html>"
-        "<head>"
-        "    <meta charset=\"UTF-8\">"
-        "    <title>Time Logging Dice</title>"
-        "</head>"
-        "<body>"
-        "    <h1>Time Logging Dice Interface</h1>";
+"<html>"
+"  <head>"
+"    <meta charset=\"UTF-8\"/>"
+"    <style>"
+"      select {"
+"          margin: 8px 4px;"
+"          padding: 12px 20px;"
+"          border: 0px;"
+"          border-radius: 8px;"
+"          background-color: white;"
+"      }"
+"      input {"
+"          padding: 12px 20px;"
+"          margin: 8px 4px;"
+"          box-sizing: border-box;"
+"          border: 1px solid #F8F8F8;"
+"          border-radius: 8px;"
+"          background-color: white;"
+"      }"
+"      input[type=\"submit\"]:hover {"
+"          transform: scale(1.12);"
+"      }"
+"      form {"
+"          background-color: #F2F2F2;"
+"          padding: 20px 20px;"
+"          border-radius: 0px;"
+"      }"
+"      body {"
+"          background-color: #white;"
+"      }"
+"      table {"
+"          border-collapse: collapse;"
+"      }"
+"      th, td {"
+"          border: 1px solid #DDDDDD;"
+"          padding: 8px;"
+"      }"
+"      tr:nth-child(even){background-color: #F2F2F2;}"
+"      tr:hover {background-color: #ddd;}"
+"      th {"
+"          padding-top: 12px;"
+"          padding-bottom: 12px;"
+"          text-align: left;"
+"          background-color: #AEE3F6;"
+"          color: white;"
+"      }"
+"    </style>"
+"    <title>Time Logging Dice</title>"
+"  </head>"
+"  <body>"
+"    <center>"
+"      <h1>Time Logging Dice Interface</h1>"
+"    </center>"
+"    <h2>Configured sides</h2>"
+"    <table>"
+"     <tr>"
+"       <th>Index</th>"
+"       <th>Workspace Name</th>"
+"       <th>Workspace ID</th>"
+"       <th>Project Name</th>"
+"       <th>Project ID</th>"
+"       <th>X</th>"
+"       <th>Y</th>"
+"       <th>Z</th>"
+"     </tr>";
     html.concat(current_sides);
-    html.concat("<h2>Current reading: </h2>");
-    html.concat(current_reading);
-    html.concat("<h2>Configuration options: </h2>");
     html.concat(
-    "    <form action=\"/save\" method=\"POST\">"
-    "        <label for=\"project\">Choose what project to log time on</label>"
-    "        <select name=\"project\" id=\"project\">"
-    "            <option value=\"noproj:noproj\">No Project/Stop Logging</option>"
-    "            <option value=\"turnoff:turnoff\">Stop Logging and Turn Off</option>");
+"    </table>"
+"    <h2>Current reading</h2>"
+"    <table>"
+"      <tr>"
+"        <th>X</th>"
+"        <th>Y</th>"
+"        <th>Z</th>"
+"        <th>Side</th>"
+"      </tr>");
+    html.concat(current_reading);
+    html.concat(
+"    </table>"
+"    <h2>Configuration options</h2>"
+"    <form action=\"/save\" method=\"POST\">"
+"      <label for=\"project\">Choose what project to log time on<br></label>"
+"      <select name=\"project\" id=\"project\">"
+"        <option value=\"noproj:noproj\">No Project/Stop Logging</option>"
+"        <option value=\"turnoff:turnoff\">Stop Logging and Turn Off</option>");
     html.concat(project_dropdown);
     html.concat(
-    "        </select><br>"
-    "        <input type=\"submit\" value=\"Save\"><br>"
-    "    </form>"
-    "    <form action=\"/format\" method=\"POST\">"
-    "        <input type=\"submit\" value=\"Clear saved sides\"><br>"
-    "    </form>"
-    "    <form action=\"/remove\" method=\"POST\">"
-    "        <input type=\"number\" name=\"index\" placeholder=\"Index\"><br>"
-    "        <input type=\"submit\" value=\"Remove\"><br>"
-    "    </form>"
-    "</body>"
-    "</html>");
+"      </select><br>"
+"      <input type=\"submit\" value=\"Save\" style=\"background-color: #91F28F\"><br>"
+"    </form>"
+"    <form action=\"/format\" method=\"POST\">"
+"      <input type=\"submit\" value=\"Clear saved sides\" style=\"background-color: #FC8A8A\"><br>"
+"    </form>"
+"    <form action=\"/remove\" method=\"POST\">"
+"      <input type=\"number\" name=\"index\" placeholder=\"Index\" required><br>"
+"      <input type=\"submit\" value=\"Remove\" style=\"background-color: #FC8A8A\"><br>"
+"    </form>"
+"  </body>"
+"</html>");
 
     if (DEBUGMODE) {
         Serial.println(html);
