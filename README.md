@@ -66,6 +66,8 @@ The source-code also needs to contain a list of all wifi access-points it can co
 wifiMulti.addAP("SSID", "password");
 ```
 
+You will also every so often need to update the fingerprint of api.clockify.me, just access it with a browser and copy the SHA1 hash to the code, and recompile.
+
 ## Connections
 I will maybe add a proper schematic here later, for now I will just write it down to document it.
 

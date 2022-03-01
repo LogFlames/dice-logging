@@ -18,7 +18,7 @@
 #define duration_deep_sleep 1
 #define last_sides_length 8
 #define project_GET_page_size 12
-#define DEBUGMODE false
+#define DEBUGMODE true
 
 // This should be built into the CORE I would assume, but it does not seem to be... Or something is not imported correctly
 #define D5 14
@@ -56,7 +56,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 const char* clockify_host = "api.clockify.me";
 const int httpsPort = 443;
 
-const char* fingerprint PROGMEM = "9F 22 D4 79 6E B4 65 7A 8E F8 C9 FE D1 8B 38 20 33 5D 23 A0";
+const char* fingerprint PROGMEM = "9E 25 6F 17 C2 C5 38 8E 80 EA D2 BB AC AD 46 94 12 88 89 23";
 
 int current_side;
 int last_side;
@@ -195,9 +195,10 @@ void GET_projects() {
     project_names = {};
     project_ids = {};
     project_workspace_ids = {};
+    project_workspace_names = {};
     String line;
 
-    for (int i = 0; i < workspace_ids.size(); i++) {
+    for (int ws_ind = 0; ws_ind < workspace_ids.size(); ws_ind++) {
         bool found_data = true;
         int page = 1;
 
@@ -210,7 +211,7 @@ void GET_projects() {
                 return;
             }
 
-            String url = "/api/v1/workspaces/" + workspace_ids[i] + "/projects?archived=false&page-size=" + String(project_GET_page_size) + "&page=" + String(page);
+            String url = "/api/v1/workspaces/" + workspace_ids[ws_ind] + "/projects?archived=false&page-size=" + String(project_GET_page_size) + "&page=" + String(page);
             if (DEBUGMODE) {
                 Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
             }
@@ -283,12 +284,15 @@ void GET_projects() {
                             }
 
                             if (DEBUGMODE) {
-                                Serial.print("Id: "); Serial.print(id); Serial.print(" Name: "); Serial.println(name);
+                                Serial.print("Id: "); Serial.print(id);
+                                Serial.print(" Name: "); Serial.print(name);
+                                Serial.print(" Workspace ID: "); Serial.print(workspace_ids[ws_ind]);
+                                Serial.print(" Workspace Name: "); Serial.println(workspace_names[ws_ind]);
                             }
                             project_names.push_back(name);
                             project_ids.push_back(id);
-                            project_workspace_ids.push_back(workspace_ids[i]);
-                            project_workspace_names.push_back(workspace_names[i]);
+                            project_workspace_ids.push_back(workspace_ids[ws_ind]);
+                            project_workspace_names.push_back(workspace_names[ws_ind]);
                             projects_this_page++;
                             if (projects_this_page >= project_GET_page_size) {
                                 found_data = true;
@@ -619,6 +623,8 @@ void setup(void) {
     pinMode(LED_BUILTIN, OUTPUT);
     pinMode(D5, INPUT);
     digitalWrite(LED_BUILTIN, LOW); // For some reason HIGH and LOW seem to be switched when it comes to the builtin led
+
+    setup_workspaces();
 
     for (unsigned int i = 0; i < last_sides_length; i++) {
         last_sides[i] = -1;
