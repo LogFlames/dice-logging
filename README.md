@@ -77,11 +77,15 @@ wifiMulti.addAP("SSID", "password");
 
 You will also every so often need to update the fingerprint of api.clockify.me, just access it with a browser and copy the SHA1 hash to the code, and recompile.
 
-## Blikning behaviour
+## Blikning behaviour and usage
 Builtin LED:  
 * (On): Probably means it is sending data to/receiving data from clockify.  
 * (4hz): If the builtin LED blinks with 4hz it means it is checking what side is up.  
 * (many hz <- You know when you see it): It is about to turn off (useful to know when the turn-off button has been registered)  
+
+To save time on startup the dice will not automatically load all projects, only the ones that have been saved to one of the sides. This has been done due to most of the dice-use will not consist of configuration where this data is necessary. If you wish to configure one of the sides, press the 'Load Projects' button, it will take some time but the page will reload and the projects will be available for configuration in the dropdown.  
+
+Another important thing to know is that if the dice only has sides configured to turn it off, it will not turn off. This is so that the user will not get locked out of configuring - if the dice automatically and instantly turns off when started.  
 
 ## Connections
 I will maybe add a proper schematic here later, for now I will just write it down to document it. <- This has now become permanent, although a little bit nicer formated that before.

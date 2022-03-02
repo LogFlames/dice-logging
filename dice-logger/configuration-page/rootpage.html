@@ -56,8 +56,8 @@
       <tr>
         <th>Index</th>
         <th>Workspace Name</th>
-        <th>Workspace ID</th>
         <th>Project Name</th>
+        <th>Workspace ID</th>
         <th>Project ID</th>
         <th>X</th>
         <th>Y</th>
@@ -66,8 +66,8 @@
       <tr>
         <td>0</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Administration </td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -76,8 +76,8 @@
       <tr>
         <td>1</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Sälj</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -86,8 +86,8 @@
       <tr>
         <td>2</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Ericsson</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>-42.2</td>
         <td>3229.1</td>
@@ -96,8 +96,8 @@
       <tr>
         <td>3</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Sweco</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>-123.2</td>
         <td>32.13</td>
@@ -106,8 +106,8 @@
       <tr>
         <td>4</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Swish</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -116,8 +116,8 @@
       <tr>
         <td>5</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Demo room</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -126,8 +126,8 @@
       <tr>
         <td>6</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Allmän produktutveckling</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>-42.2</td>
         <td>3229.1</td>
@@ -136,8 +136,8 @@
       <tr>
         <td>7</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>Internmöte</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>-123.2</td>
         <td>32.13</td>
@@ -146,8 +146,8 @@
       <tr>
         <td>8</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>No Project</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -156,8 +156,8 @@
       <tr>
         <td>9</td>
         <td>AtC</td>
-        <td>12351233512434523</td>
         <td>LiU Student rekrytering</td>
+        <td>12351233512434523</td>
         <td>123989182392</td>
         <td>32.13</td>
         <td>3229.1</td>
@@ -168,20 +168,23 @@
     <h2>Current reading</h2>
     <table>
       <tr>
+        <th>Side</th>
         <th>X</th>
         <th>Y</th>
         <th>Z</th>
-        <th>Side</th>
       </tr>
       <tr>
+        <td>2</td>
         <td>12.321</td>
         <td>-2.42</td>
         <td>42.13</td>
-        <td>2</td>
       </tr>
     </table>
     <h2>Configuration options</h2>
 
+    <form action="/getprojects" method="POST" onsubmit="document.getElementById('getprojects').disabled = true;">
+      <input type="submit" id="getprojects" value="Load Projects" style="background-color: #AEE3F6"><br>
+    </form>
     <form action="/save" method="POST">
       <label for="project">Choose what project to log time on<br></label>
       <select name="project" id="project">

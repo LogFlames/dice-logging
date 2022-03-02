@@ -40,13 +40,11 @@ std::vector<float> sides_Ys = {};
 std::vector<float> sides_Zs = {};
 std::vector<String> sides_project_names = {};
 std::vector<String> sides_project_ids = {};
-std::vector<String> sides_workspace_names = {};
-std::vector<String> sides_workspace_ids = {};
+std::vector<int> sides_workspace_indexes = {};
 
 std::vector<String> project_names = {};
 std::vector<String> project_ids = {};
-std::vector<String> project_workspace_names = {};
-std::vector<String> project_workspace_ids = {};
+std::vector<int> project_workspace_indexes = {};
 String user_id = "";
 
 const char* configuration_filename = "/configuration.txt";
@@ -194,8 +192,7 @@ void GET_projects() {
 
     project_names = {};
     project_ids = {};
-    project_workspace_ids = {};
-    project_workspace_names = {};
+    project_workspace_indexes = {};
     String line;
 
     for (int ws_ind = 0; ws_ind < workspace_ids.size(); ws_ind++) {
@@ -291,8 +288,7 @@ void GET_projects() {
                             }
                             project_names.push_back(name);
                             project_ids.push_back(id);
-                            project_workspace_ids.push_back(workspace_ids[ws_ind]);
-                            project_workspace_names.push_back(workspace_names[ws_ind]);
+                            project_workspace_indexes.push_back(ws_ind);
                             projects_this_page++;
                             if (projects_this_page >= project_GET_page_size) {
                                 found_data = true;
@@ -363,7 +359,7 @@ void POST_project_start() {
         return;
     }
 
-    String url = "/api/v1/workspaces/" + sides_workspace_ids[current_side] + "/time-entries";
+    String url = "/api/v1/workspaces/" + workspace_ids[sides_workspace_indexes[current_side]] + "/time-entries";
     if (DEBUGMODE) {
         Serial.print("Requesting URL: "); Serial.print(clockify_host); Serial.println(url);
     }
@@ -383,8 +379,15 @@ void POST_project_start() {
 }
 
 void POST_project() {
-    if (current_side == -1 || sides_project_ids[current_side].length() <= 10) { // NOTE: We should be able to compare it to "noproj". But for some reason the length is 7, probably some \r or other character at the end or begining :(
-        if (sides_project_ids[current_side][0] == 't') { // turn_off
+    if (current_side == -1 || sides_project_ids[current_side].length() <= 10 || sides_workspace_indexes[current_side] == -1) { // NOTE: We should be able to compare it to "noproj". But for some reason the length is 7, probably some \r or other character at the end or begining :(
+        bool only_turn_off = true;
+        for (int i = 0; i < sides_project_ids.size(); i++) {
+            if (sides_project_ids[i][0] != 't') {
+                only_turn_off = false;
+                break;
+            }
+        }
+        if (sides_project_ids[current_side][0] == 't' && !only_turn_off) { // turn_off, otherwise just stop_projects && only work if there are other sides than 'turnoff' <- impossible to configure otherwise
             turn_off();
         } else {
             PATCH_project_stop();
@@ -515,20 +518,7 @@ void load_configuration() {
                     Serial.print(c);
                 }
                 if (c == ';') {
-                    sides_workspace_names.push_back(current);
-                    current = "";
-                } else if (c == '\n') {
-                    break;
-                } else {
-                    current.concat(c);
-                }
-            }
-            while (f.available() && (c = (char)f.read())) {
-                if (DEBUGMODE) {
-                    Serial.print(c);
-                }
-                if (c == ';') {
-                    sides_workspace_ids.push_back(current);
+                    sides_workspace_indexes.push_back(current.toInt());
                     current = "";
                 } else if (c == '\n') {
                     break;
@@ -545,8 +535,7 @@ void load_configuration() {
                 sides_Ys.size() != sides_Zs.size() ||
                 sides_Zs.size() != sides_project_ids.size() ||
                 sides_project_ids.size() != sides_project_names.size() ||
-                sides_project_names.size() != sides_workspace_names.size() ||
-                sides_workspace_names.size() != sides_workspace_ids.size()) {
+                sides_project_names.size() != sides_workspace_indexes.size()) {
                 if (DEBUGMODE) {
                     Serial.println("The loaded values did not have the same size. Formatting memory...");
                 }
@@ -592,13 +581,8 @@ void write_configuration() {
             f.print(";");
         }
         f.print("\n");
-        for (unsigned int i = 0; i < sides_workspace_names.size(); i++) {
-            f.print(sides_workspace_names[i]);
-            f.print(";");
-        }
-        f.print("\n");
-        for (unsigned int i = 0; i < sides_workspace_ids.size(); i++) {
-            f.print(sides_workspace_ids[i]);
+        for (unsigned int i = 0; i < sides_workspace_indexes.size(); i++) {
+            f.print(String(sides_workspace_indexes[i]));
             f.print(";");
         }
         f.print("\n");
@@ -708,6 +692,7 @@ void setup(void) {
     }
 
     server.on("/", HTTP_GET, handle_root);
+    server.on("/getprojects", HTTP_POST, handle_get_projects);
     server.on("/save", HTTP_POST, handle_save);
     server.on("/format", HTTP_POST, handle_format);
     server.on("/remove", HTTP_POST, handle_remove);
@@ -717,7 +702,7 @@ void setup(void) {
     if (DEBUGMODE) {
         Serial.println("HTTP server started");
     }
-    GET_projects();
+    /* GET_projects(); */ // Do not do this every start, will save a lot of time on startup
     GET_user();
     if (DEBUGMODE) {
         Serial.print("UserID: "); Serial.println(user_id);
@@ -796,11 +781,11 @@ void handle_root() {
         current_sides.concat("<tr><td>");
         current_sides.concat(i);
         current_sides.concat("</td><td>");
-        current_sides.concat(sides_workspace_names[i]);
-        current_sides.concat("</td><td>");
-        current_sides.concat(sides_workspace_ids[i]);
+        current_sides.concat(workspace_names[sides_workspace_indexes[i]]);
         current_sides.concat("</td><td>");
         current_sides.concat(sides_project_names[i]);
+        current_sides.concat("</td><td>");
+        current_sides.concat(workspace_ids[sides_workspace_indexes[i]]);
         current_sides.concat("</td><td>");
         current_sides.concat(sides_project_ids[i]);
         current_sides.concat("</td><td>");
@@ -812,119 +797,132 @@ void handle_root() {
         current_sides.concat("</td></tr>");
     }
 
-    String current_reading = "X: ";
-    current_reading.concat(event.acceleration.x);
-    current_reading.concat(" Y: ");
-    current_reading.concat(event.acceleration.y);
-    current_reading.concat(" Z: ");
-    current_reading.concat(event.acceleration.z);
-    current_reading.concat(" Side: ");
+    String current_reading = "<tr><td>";
     current_reading.concat(read_side());
+    current_reading.concat("</td><td>");
+    current_reading.concat(event.acceleration.x);
+    current_reading.concat("</td><td>");
+    current_reading.concat(event.acceleration.y);
+    current_reading.concat("</td><td>");
+    current_reading.concat(event.acceleration.z);
+    current_reading.concat("</td></tr>");
 
     String project_dropdown = "";
     for (unsigned int i = 0; i < project_names.size(); i++) {
-        project_dropdown += "<option value=\"" + project_workspace_ids[i] + ":" + project_ids[i] + "\">" + project_workspace_names[i] + ": " + project_names[i] + "</option>";
+        project_dropdown +=
+            "<option value=\"" +
+            String(project_workspace_indexes[i]) +
+            ":" +
+            project_ids[i] +
+            "\">" +
+            workspace_names[project_workspace_indexes[i]] +
+            ": " +
+            project_names[i] +
+            "</option>";
     }
 
     String html =
 "<html>"
-"  <head>"
-"    <meta charset=\"UTF-8\"/>"
-"    <style>"
-"      select {"
-"          margin: 8px 4px;"
-"          padding: 12px 20px;"
-"          border: 0px;"
-"          border-radius: 8px;"
-"          background-color: white;"
-"      }"
-"      input {"
-"          padding: 12px 20px;"
-"          margin: 8px 4px;"
-"          box-sizing: border-box;"
-"          border: 1px solid #F8F8F8;"
-"          border-radius: 8px;"
-"          background-color: white;"
-"      }"
-"      input[type=\"submit\"]:hover {"
-"          transform: scale(1.12);"
-"      }"
-"      form {"
-"          background-color: #F2F2F2;"
-"          padding: 20px 20px;"
-"          border-radius: 0px;"
-"      }"
-"      body {"
-"          background-color: #white;"
-"      }"
-"      table {"
-"          border-collapse: collapse;"
-"      }"
-"      th, td {"
-"          border: 1px solid #DDDDDD;"
-"          padding: 8px;"
-"      }"
-"      tr:nth-child(even){background-color: #F2F2F2;}"
-"      tr:hover {background-color: #ddd;}"
-"      th {"
-"          padding-top: 12px;"
-"          padding-bottom: 12px;"
-"          text-align: left;"
-"          background-color: #AEE3F6;"
-"          color: white;"
-"      }"
-"    </style>"
-"    <title>Time Logging Dice</title>"
-"  </head>"
-"  <body>"
-"    <center>"
-"      <h1>Time Logging Dice Interface</h1>"
-"    </center>"
-"    <h2>Configured sides</h2>"
-"    <table>"
-"     <tr>"
-"       <th>Index</th>"
-"       <th>Workspace Name</th>"
-"       <th>Workspace ID</th>"
-"       <th>Project Name</th>"
-"       <th>Project ID</th>"
-"       <th>X</th>"
-"       <th>Y</th>"
-"       <th>Z</th>"
-"     </tr>";
+  "<head>"
+    "<meta charset=\"UTF-8\"/>"
+    "<style>"
+      "select {"
+          "margin: 8px 4px;"
+          "padding: 12px 20px;"
+          "border: 0px;"
+          "border-radius: 8px;"
+          "background-color: white;"
+      "}"
+      "input {"
+          "padding: 12px 20px;"
+          "margin: 8px 4px;"
+          "box-sizing: border-box;"
+          "border: 1px solid #F8F8F8;"
+          "border-radius: 8px;"
+          "background-color: white;"
+      "}"
+      "input[type=\"submit\"]:hover {"
+          "transform: scale(1.12);"
+      "}"
+      "form {"
+          "background-color: #F2F2F2;"
+          "padding: 20px 20px;"
+          "border-radius: 0px;"
+      "}"
+      "body {"
+          "background-color: #white;"
+      "}"
+      "table {"
+          "border-collapse: collapse;"
+      "}"
+      "th, td {"
+          "border: 1px solid #DDDDDD;"
+          "padding: 8px;"
+      "}"
+      "tr:nth-child(even){background-color: #F2F2F2;}"
+      "tr:hover {background-color: #ddd;}"
+      "th {"
+          "padding-top: 12px;"
+          "padding-bottom: 12px;"
+          "text-align: left;"
+          "background-color: #AEE3F6;"
+          "color: white;"
+      "}"
+    "</style>"
+    "<title>Time Logging Dice</title>"
+  "</head>"
+  "<body>"
+    "<center>"
+      "<h1>Time Logging Dice Interface</h1>"
+    "</center>"
+    "<h2>Configured sides</h2>"
+    "<table>"
+     "<tr>"
+       "<th>Index</th>"
+       "<th>Workspace Name</th>"
+       "<th>Project Name</th>"
+       "<th>Workspace ID</th>"
+       "<th>Project ID</th>"
+       "<th>X</th>"
+       "<th>Y</th>"
+       "<th>Z</th>"
+     "</tr>";
     html.concat(current_sides);
     html.concat(
-"    </table>"
-"    <h2>Current reading</h2>"
-"    <table>"
-"      <tr>"
-"        <th>X</th>"
-"        <th>Y</th>"
-"        <th>Z</th>"
-"        <th>Side</th>"
-"      </tr>");
+    "</table>"
+    "<h2>Current reading</h2>"
+    "<table>"
+      "<tr>"
+        "<th>Side</th>"
+        "<th>X</th>"
+        "<th>Y</th>"
+        "<th>Z</th>"
+      "</tr>");
     html.concat(current_reading);
     html.concat(
-"    </table>"
-"    <h2>Configuration options</h2>"
-"    <form action=\"/save\" method=\"POST\">"
-"      <label for=\"project\">Choose what project to log time on<br></label>"
-"      <select name=\"project\" id=\"project\">"
-"        <option value=\"noproj:noproj\">No Project/Stop Logging</option>"
-"        <option value=\"turnoff:turnoff\">Stop Logging and Turn Off</option>");
+    "</table>"
+    "<h2>Configuration options</h2>"
+    "<form action=\"/getprojects\" method=\"POST\" onsubmit=\"document.getElementById('getprojects').disabled = true;\">"
+      "<input type=\"submit\" id=\"getprojects\" value=\"Load Projects\" style=\"background-color: #AEE3F6\"><br>"
+    "</form>"
+    "<form action=\"/save\" method=\"POST\">"
+      "<label for=\"project\">Choose what project to log time on<br></label>"
+      "<select name=\"project\" id=\"project\">"
+        "<option value=\"noproj:noproj\">No Project/Stop Logging</option>"
+        "<option value=\"turnoff:turnoff\">Stop Logging and Turn Off</option>");
     html.concat(project_dropdown);
     html.concat(
-"      </select><br>"
-"      <input type=\"submit\" value=\"Save\" style=\"background-color: #91F28F\"><br>"
-"    </form>"
-"    <form action=\"/format\" method=\"POST\">"
-"      <input type=\"submit\" value=\"Clear saved sides\" style=\"background-color: #FC8A8A\"><br>"
-"    </form>"
-"    <form action=\"/remove\" method=\"POST\">"
-"      <input type=\"number\" name=\"index\" placeholder=\"Index\" required><br>"
-"      <input type=\"submit\" value=\"Remove\" style=\"background-color: #FC8A8A\"><br>"
-"    </form>"
-"  </body>"
+      "</select><br>"
+      "<input type=\"submit\" value=\"Save\" style=\"background-color: #91F28F\"><br>"
+    "</form>"
+    "<form action=\"/format\" method=\"POST\">"
+      "<input type=\"submit\" value=\"Clear saved sides\" style=\"background-color: #FC8A8A\"><br>"
+    "</form>"
+    "<form action=\"/remove\" method=\"POST\">"
+      "<input type=\"number\" name=\"index\" placeholder=\"Index\" required><br>"
+      "<input type=\"submit\" value=\"Remove\" style=\"background-color: #FC8A8A\"><br>"
+    "</form>"
+  "</body>"
 "</html>");
 
     if (DEBUGMODE) {
@@ -932,6 +930,11 @@ void handle_root() {
     }
 
     server.send(200, "text/html", html);
+}
+
+void handle_get_projects() {
+    GET_projects();
+    redirect_back_to_root();
 }
 
 void handle_save() {
@@ -956,8 +959,8 @@ void handle_save() {
             project_id.concat(server.arg("project")[i]);
         }
     }
+
     sides_project_ids.push_back(project_id);
-    sides_workspace_ids.push_back(ws_id);
 
     if (project_id == "noproj") {
         sides_project_names.push_back("No Project/Stop Logging");
@@ -977,20 +980,11 @@ void handle_save() {
     }
 
     if (ws_id == "noproj") {
-        sides_workspace_names.push_back("");
+        sides_workspace_indexes.push_back(-1);
     } else if (ws_id == "turnoff") {
-        sides_workspace_names.push_back("");
+        sides_workspace_indexes.push_back(-1);
     } else {
-        for (unsigned int i = 0; i < project_ids.size(); i++) {
-            if (DEBUGMODE) {
-                Serial.println(workspace_ids[i]);
-                Serial.println(ws_id);
-            }
-            if (workspace_ids[i] == ws_id) {
-                sides_workspace_names.push_back(workspace_names[i]);
-                break;
-            }
-        }
+        sides_workspace_indexes.push_back(ws_id.toInt());
     }
 
     write_configuration();
@@ -1005,8 +999,7 @@ void handle_format() {
     sides_Zs = {};
     sides_project_ids = {};
     sides_project_names = {};
-    sides_workspace_names = {};
-    sides_workspace_ids = {};
+    sides_workspace_indexes = {};
 
     redirect_back_to_root();
 }
@@ -1029,10 +1022,12 @@ void handle_remove() {
     sides_Zs.erase(sides_Zs.begin() + ind);
     sides_project_ids.erase(sides_project_ids.begin() + ind);
     sides_project_names.erase(sides_project_names.begin() + ind);
-    sides_workspace_ids.erase(sides_workspace_ids.begin() + ind);
-    sides_workspace_names.erase(sides_workspace_names.begin() + ind);
+    sides_workspace_indexes.erase(sides_workspace_indexes.begin() + ind);
 
     write_configuration();
+
+    PATCH_project_stop();
+    last_side = -1;
 
     redirect_back_to_root();
 }
